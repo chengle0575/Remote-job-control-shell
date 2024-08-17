@@ -7,6 +7,9 @@ public abstract class Slave {
 
         //create a socket to connect to the center
         connectCenter();
+
+        //getting shell command from center
+
     }
 
 
@@ -14,8 +17,7 @@ public abstract class Slave {
         try{
             Socket socket=new Socket();
 
-            SocketAddress centeradd=new InetSocketAddress("localhost",5110);
-
+            SocketAddress centeradd=new InetSocketAddress(SlaveConfigs.getCenterHostname(),5110);
             socket.connect(centeradd);
 
         }catch (Exception e){
