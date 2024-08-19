@@ -1,41 +1,58 @@
 import java.net.*;
 import java.io.*;
+import java.rmi.server.ExportException;
 
-public abstract class Slave {
+public abstract class Slave extends Node{
 
     public static void main(String[] args){
 
-        //create a socket to connect to the center
-        connectCenter();
-
         //getting shell command from center
+        executeCommand("ls");
+
+
+        //create a socket to connect to the center
+        Socket socket=connectCenter();
+
+
+        //write data to center machine
+        sendmessage(socket,"slave is cconnected");
+
+        //get data from the center machine
+        char[] contents=new char[10];
+        recievemessage(socket,contents);
+
+
 
 
     }
 
 
-    public static void connectCenter(){
-        try{
-            Socket socket=new Socket();
+    public static Socket connectCenter(){
+        Socket socket=new Socket();
 
+        try{
             SocketAddress centeradd=new InetSocketAddress(SlaveConfigs.getCenterHostname(),5110);
             socket.connect(centeradd);
-
-            //write data to center machine
-            Writer w=new OutputStreamWriter(socket.getOutputStream());
-            w.write("slave is coming!");
-            System.out.println("slave finish writing");
-            //get data from the center machine
-            Reader r=new InputStreamReader(socket.getInputStream());
-            char[] contents=new char[2];
-            System.out.println("finish reading");
-
-            System.out.println(contents[0]);
-
         }catch (Exception e){
             System.out.println(e);
         }
 
+        return socket;
+    }
+
+
+    public static void executeCommand(String command){
+        try{
+            Process p=Runtime.getRuntime().exec(command);
+
+            BufferedReader r=new BufferedReader(new InputStreamReader(p.getInputStream()));
+
+            String line=r.readLine();
+            System.out.println(line);
+
+        }catch (Exception e){
+            System.out.println(e);
+        }
 
     }
 

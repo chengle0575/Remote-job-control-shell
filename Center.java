@@ -5,7 +5,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Center{
+public class Center extends Node{
 
 
 
@@ -26,17 +26,18 @@ public class Center{
                 System.out.println("connected!");
 
                 //send message to the slave
-                Writer w=new OutputStreamWriter(socket.getOutputStream());
-                w.write("hello salve, are you good today");
-                w.flush();
+                sendmessage(socket,"hi slave, how are you!");
                 System.out.println("already sent");
 
+                char[] reading=new char[100];
+                recievemessage(socket,reading);
+                System.out.println(reading);
 
-                Reader r=new InputStreamReader(socket.getInputStream());
-                char[] readinng=new char[2];
-                int i=r.read(readinng);
-                System.out.println(i);
-                System.out.println(readinng);
+
+
+                //send command to slave
+                sendmessage(socket,"ls");
+
 
             }
 
@@ -48,6 +49,9 @@ public class Center{
 
         //connet to multipple server
     }
+
+
+
 
 
 
