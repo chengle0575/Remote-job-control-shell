@@ -1,6 +1,6 @@
 import java.net.InetAddress;
 
-/*contains all the config info used in Slave object*/
+/*contains all the config info used in object*/
 /*Use singleton to make sure only one instance will be initiated, and can be accessed globally*/
 public class SlaveConfigs{
     
