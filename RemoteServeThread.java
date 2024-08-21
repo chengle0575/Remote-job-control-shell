@@ -4,6 +4,8 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class RemoteServeThread extends Node implements Runnable{
 
@@ -17,8 +19,12 @@ public class RemoteServeThread extends Node implements Runnable{
 
 
             try{
+                System.out.println("A client is connected");
+                sendMessage(socket,new ConnectionInfo(getCurDirectory())); //send current directory path to the client
+                System.out.println("Waiting command from client......");
                 String command=recieveCommand(this.socket);//get command from this socket and run command
                 System.out.println(command);
+
                 List<String> result=executeCommand(command);
                 System.out.println(result);
                 sendResult(this.socket,result);
@@ -53,5 +59,24 @@ public class RemoteServeThread extends Node implements Runnable{
         return result;
 
     }
+
+    public static String getCurDirectory() throws IOException{
+        List<String> result=executeCommand("pwd");
+        return result.get(0);
+    }
+
+    public static boolean isTextFile(String pathname) throws IOException{
+        String regrex="\\.(pdf|doc|java|md)$";
+        Pattern p= Pattern.compile(regrex);
+        Matcher m=p.matcher(pathname);
+        return m.matches();
+
+    }
+
+
+
+
+
+
 
 }

@@ -4,19 +4,27 @@ import java.util.List;
 
 public abstract class Client extends Node{
 
+    private static String remoteCurFilePath;
+
     public static void main(String[] args){
 
         try{
             Socket socket=connectRemote(5110);//create a socket to connect to the remote
 
-            //sendmessage(socket,"client connected");//write data to remote machine
+            remoteCurFilePath=recievemessgae(socket); //get the current direcory of the remote machine
+
+
+            System.out.println("Remote machine is working in: "+remoteCurFilePath);
 
             String command=commandFromUser();//send command to remote machine
-            sendmessage(socket,command);
+            sendMessage(socket,new Command(command,remoteCurFilePath));
 
             List<String> result=recieveResult(socket);
-
             System.out.println(result);
+
+
+            //get file from the remote machine
+
 
         }catch (Exception e){
             System.out.println(e);
