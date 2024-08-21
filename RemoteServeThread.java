@@ -21,6 +21,7 @@ public class RemoteServeThread extends Node implements Runnable{
             try{
                 System.out.println("A client is connected");
                 sendMessage(socket,new ConnectionInfo(getCurDirectory())); //send current directory path to the client
+
                 System.out.println("Waiting command from client......");
                 String command=recieveCommand(this.socket);//get command from this socket and run command
                 System.out.println(command);
@@ -42,23 +43,37 @@ public class RemoteServeThread extends Node implements Runnable{
 
 
 
-    public static List<String> executeCommand(String command) throws IOException {
-        Process p = Runtime.getRuntime().exec(command);
-
-        BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()));
-
+    public static List<String> executeCommand(String command)  {
         List<String> result=new ArrayList<>();
 
-        String line = r.readLine();
-        while (line != null) {
-            result.add(line);
-            System.out.println(line);
-            line = r.readLine();
+
+        try{
+            Process p = Runtime.getRuntime().exec(command);
+
+            BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()));
+
+            String line = r.readLine();
+            while (line != null) {
+                result.add(line);
+                System.out.println(line);
+                line = r.readLine();
+            }
+
+            return result;
+        }catch (IOException e){
+            //deal with command not able to execute directly in remote shell
+
+            if(command.matches("^getFile {1}")){
+                //try to find file name in the given pathname
+
+            }
+
         }
 
-        return result;
 
     }
+
+
 
     public static String getCurDirectory() throws IOException{
         List<String> result=executeCommand("pwd");

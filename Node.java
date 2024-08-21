@@ -57,11 +57,7 @@ public abstract class Node {
 
     }
 
-    public static String commandFromUser() throws IOException{
-        BufferedReader r=new BufferedReader(new InputStreamReader(System.in));
-        String command=r.readLine();
-        return command;
-    }
+
 
 
     public static void getlocalFile(String pathname) throws IOException{
