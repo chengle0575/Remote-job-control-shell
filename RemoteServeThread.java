@@ -43,20 +43,20 @@ public class RemoteServeThread extends Node implements Runnable{
 
 
     public static boolean checkFilePathValid(String filepath){ //using bash scripting to check if filepath valid
+        Process p=null;
         try{
             List<String> s=new ArrayList<>();
             s.add("bash");
             s.add("CheckFilePathExist.sh");
 
             ProcessBuilder pb=new ProcessBuilder(s);
-            Process p=pb.redirectInput(ProcessBuilder.Redirect.PIPE).redirectOutput(ProcessBuilder.Redirect.PIPE).start();
+            p=pb.redirectInput(ProcessBuilder.Redirect.PIPE).redirectOutput(ProcessBuilder.Redirect.PIPE).start();
 
             //write into process pipe
             Writer w=new OutputStreamWriter(p.getOutputStream());
             w.write(filepath);
             w.flush();
             w.close(); //close the writer ,to avoid process input pipe waiting for input
-
 
             //get output from process pipe
             BufferedReader r=new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -70,11 +70,14 @@ public class RemoteServeThread extends Node implements Runnable{
                 return false;
             }
 
-        }catch (Exception e){//implies the filepath is invalid
+        }catch (Exception e){
             System.out.println(e);
+            return false;
+        }finally {//will always happen. before the 'return statement' in try/catch block
+            if(p!=null){
+                p.destroy();//kill the process manually, to release resources.
+            }
         }
-
-        return false;
     }
 
 
