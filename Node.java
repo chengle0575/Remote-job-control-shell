@@ -9,7 +9,7 @@ public abstract class Node {
         Writer w=new OutputStreamWriter(socket.getOutputStream());
         w.write(message.stringToSend()+"\n"); /*\n as end mark recognized by readline()*/
         w.flush();
-        w.close();
+
     }
 
    /*

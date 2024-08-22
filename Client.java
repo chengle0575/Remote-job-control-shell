@@ -26,6 +26,11 @@ public abstract class Client extends Node{
 
                 Info info=(Info)recievemessgae(socket);
                 System.out.println(info.toString());
+
+                if("INVALID FILE PATH".equals(info.toString())){
+                    System.out.println("checkout!!!!!!!!!!!");
+                    remoteCurFilePath=remotePreFilePath; //invert the change of filepath
+                }
             }
 
         }catch (Exception e){
@@ -75,17 +80,17 @@ public abstract class Client extends Node{
             if(aimfile.startsWith("..")){ //means to go to to the parent directory
                 int lastslash=remoteCurFilePath.lastIndexOf('/');
                 if(lastslash>0){ //can only go to parent directory is not in the root
-                    remoteCurFilePath=remoteCurFilePath.substring(0,lastslash);
+                    remoteCurFilePath=remoteCurFilePath.substring(0,lastslash+1);
                 }
             }
 
             int firstslash=aimfile.indexOf('/');
             if(firstslash!=-1){ //excluding '.' and '..' these two situation
-                remoteCurFilePath=remoteCurFilePath+"/"+aimfile.substring(firstslash+1);
+                remoteCurFilePath=remoteCurFilePath+aimfile.substring(firstslash+1);
             }
 
         }else{
-            remoteCurFilePath=remoteCurFilePath+"/"+aimfile;
+            remoteCurFilePath=remoteCurFilePath+aimfile;
         }
 
     }

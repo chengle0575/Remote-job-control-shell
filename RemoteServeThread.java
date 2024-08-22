@@ -19,26 +19,24 @@ public class RemoteServeThread extends Node implements Runnable{
                 sendMessage(socket,new Info(getCurDirectory())); //send current directory path to the client
 
                 System.out.println("Waiting command from client......");
-                Command command=recieveCommand(this.socket);//get command from this socket and run command
-                System.out.println(command);
+                while(true){
+                    Command command=recieveCommand(this.socket);//get command from this socket and run command
+                    System.out.println(command);
 
-                if(checkFilePathValid(command.getFilepath())){
-                    System.out.println("valid filepath");
-                    Message result=executeCommand(command);
-                    sendMessage(this.socket,result);
-                }else{
-                    System.out.println("invalid filepath");
-                    sendMessage(this.socket,new Info("INVALID FILE PATH"));
+                    if(checkFilePathValid(command.getFilepath())){
+                        System.out.println("valid filepath");
+                        Message result=executeCommand(command);
+                        sendMessage(this.socket,result);
+                    }else{
+                        System.out.println("invalid filepath");
+                        sendMessage(this.socket,new Info("INVALID FILE PATH"));
+                    }
                 }
 
 
             }catch (IOException e){
                 System.out.println(e);
             }
-
-
-
-
     }
 
 
