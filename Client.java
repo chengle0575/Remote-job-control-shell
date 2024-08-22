@@ -1,9 +1,11 @@
 import java.net.*;
 import java.io.*;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public abstract class Client extends Node{
 
+    private static String remotePreFilePath;
     private static String remoteCurFilePath;
 
     public static void main(String[] args){
@@ -11,22 +13,20 @@ public abstract class Client extends Node{
         try{
             Socket socket=connectRemote(5110);//create a socket to connect to the remote
 
-            remoteCurFilePath=recievemessgae(socket); //get the current direcory of the remote machine
-
-
+            remoteCurFilePath=recievemessgae(socket).toString(); //get the current direcory of the remote machine
             System.out.println("Remote machine is working in: "+remoteCurFilePath);
 
-            String command=commandFromUser();//send command to remote machine
-            sendMessage(socket,new Command(command,remoteCurFilePath));
+            while (true){
+                String command=commandFromUser();//send command to remote machine
 
+                System.out.println("command sent: "+command);
+                System.out.println("file path sent: "+remoteCurFilePath);
 
+                sendMessage(socket,new Command(command,remoteCurFilePath));
 
-            List<String> result=recieveResult(socket);
-            System.out.println(result);
-
-
-            //get file from the remote machine
-
+                Info info=(Info)recievemessgae(socket);
+                System.out.println(info.toString());
+            }
 
         }catch (Exception e){
             System.out.println(e);
@@ -53,11 +53,11 @@ public abstract class Client extends Node{
         String command=r.readLine();
 
         //deal with 'cd' command here
-        if(command.matches("^cd {1}")){
-            //change the filepath
-
-            remoteCurFilePath=remoteCurFilePath+"/"+
+        if(command.startsWith("cd ")){ //change the current working filepath of the remote machine
+            updateRemoteCurFilePath(command);
+            command="ls";  //try 'ls' command to check if the new working filepath is valid for remote machine
         }
+
         return command;
     }
 
@@ -65,7 +65,7 @@ public abstract class Client extends Node{
 
     public static void updateRemoteCurFilePath(String cdCommand){
         //assuming the cdcommand is reasonable, the requested folder exist
-
+        remotePreFilePath=remoteCurFilePath; //store the copy to enable undo the changing of curfilepath
         String commandAftCd=cdCommand.replaceFirst("^cd","") ;
         String aimfile=commandAftCd.trim();
 
@@ -89,6 +89,7 @@ public abstract class Client extends Node{
         }
 
     }
+
 
 
 

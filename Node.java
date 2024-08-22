@@ -9,6 +9,7 @@ public abstract class Node {
         Writer w=new OutputStreamWriter(socket.getOutputStream());
         w.write(message.stringToSend()+"\n"); /*\n as end mark recognized by readline()*/
         w.flush();
+        w.close();
     }
 
    /*
@@ -27,13 +28,35 @@ public abstract class Node {
 
     */
 
+    public static Command recieveCommand(Socket socket) throws IOException {
+
+        BufferedReader r=new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        String command=r.readLine();
+        String filepath=r.readLine();
+
+        return new Command(command,filepath);
+    }
+
+
+
+    /*
     public static String recievemessgae(Socket socket) throws IOException{
         BufferedReader r=new BufferedReader(new InputStreamReader(socket.getInputStream()));
         String message=r.readLine();
         return message;
     }
 
+     */
 
+    public static Message recievemessgae(Socket socket) throws IOException{
+        BufferedReader r=new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        String message=r.readLine();
+        return new Info(message);
+    }
+
+
+
+/*
     public static String recieveCommand(Socket socket) throws IOException {
 
         BufferedReader r=new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -41,6 +64,7 @@ public abstract class Node {
 
         return command;
     }
+*/
 
     public static void sendResult(Socket socket,List<String> result) throws IOException{
         ObjectOutputStream w=new ObjectOutputStream(socket.getOutputStream()); //ObjectOutputStream used to write serializable object into outputstream
