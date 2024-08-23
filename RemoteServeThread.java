@@ -85,6 +85,9 @@ public class RemoteServeThread extends Node implements Runnable{
         String command=c.getCommand();
         String filepath=c.getFilepath();
 
+        if("gFile".equals(command)){//deal with getfile command here
+        }
+
         File file=new File(filepath);
 
         Result result=new Result();
@@ -120,9 +123,25 @@ public class RemoteServeThread extends Node implements Runnable{
 
 
     public static String getCurDirectory() throws IOException{
-        Result result=(Result)executeCommand(new Command("pwd","."));
-        return result.getResult().get(0);
+        return System.getProperty("user.dir");
     }
+
+    public static void sendLocalByteFile(Socket socket,String filepath) throws IOException{
+        //assuming the filepath refer to 'raw byte file', not text file ,not directory
+        FileInputStream f=new FileInputStream("./blue.png");
+        f.read();
+
+
+        BufferedWriter w=new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+       // w.write();
+
+    }
+
+    public static void sendLocalTextFile() throws IOException{
+
+    }
+
+
 
     public static boolean isTextFile(String pathname) throws IOException{
         String regrex="\\.(pdf|doc|java|md)$";

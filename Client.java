@@ -67,7 +67,6 @@ public abstract class Client extends Node{
     }
 
 
-
     public static void updateRemoteCurFilePath(String cdCommand){
         //assuming the cdcommand is reasonable, the requested folder exist
         remotePreFilePath=remoteCurFilePath; //store the copy to enable undo the changing of curfilepath
