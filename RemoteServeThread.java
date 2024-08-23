@@ -78,7 +78,13 @@ public class RemoteServeThread extends Node implements Runnable{
 
             if(command.matches("^getFile {1}")){
                 //try to find file name in the given pathname
+                if(file.isFile()){ //is normal file
 
+                }else if(file.isDirectory()){ //is directory
+
+                }else{ //eg/ symbolic links
+
+                }
             }
             return null;
 

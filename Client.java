@@ -89,7 +89,13 @@ public abstract class Client extends Node{
             }
 
         }else{
-            remoteCurFilePath=remoteCurFilePath+aimfile;
+            File f=new File(aimfile);
+            if(f.isAbsolute()){
+                remoteCurFilePath=aimfile;
+            }else{
+                remoteCurFilePath=remoteCurFilePath+aimfile;
+            }
+
         }
 
     }
