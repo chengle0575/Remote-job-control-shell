@@ -30,8 +30,8 @@ public class RemoteServeThread extends Node implements Runnable{
                         System.out.println("valid filepath");
 
 
-                        if(command.getCommand().equals("getFile")){//deal with getFile command
-                            sendFile(this.socket,command.getFilepath());
+                        if(command.getCommand().startsWith("getFile")){//deal with getFile command
+                            sendFile(this.socket, command.getCommand().substring(8),command.getFilepath()+command.getCommand().substring(8));
                             System.out.println("file is sent");
 
                         }else{ //deal with executable command
@@ -53,13 +53,14 @@ public class RemoteServeThread extends Node implements Runnable{
     }
 
 
+    public static String getCurDirectory() throws IOException{
+        return System.getProperty("user.dir");
+    }
+
     public static boolean checkFilePathValid(String filepath){ //using bash scripting to check if filepath valid
         File f=new File(filepath);
         return f.exists();
     }
-
-
-
 
     public Message executeCommand(Command c) throws NullPointerException{
         String command=c.getCommand();
@@ -76,7 +77,6 @@ public class RemoteServeThread extends Node implements Runnable{
             String line = r.readLine();
             while (line != null) {
                 result.add(line);
-                System.out.println(line);
                 line = r.readLine();
             }
 
@@ -90,19 +90,14 @@ public class RemoteServeThread extends Node implements Runnable{
     }
 
 
+    public static void sendFile(Socket socket,String filename,String filepath) throws IOException{
 
-    public static String getCurDirectory() throws IOException{
-        return System.getProperty("user.dir");
-    }
-
-
-
-    public static void sendFile(Socket socket,String filepath) throws IOException{
+        System.out.println("want to get file: "+filepath);
         BufferedOutputStream w=new BufferedOutputStream(socket.getOutputStream());
 
        //compress the file
         String aftcompressName=new File(filepath).getName();
-        zipCompress(aftcompressName,filepath);
+        zipCompress(aftcompressName,filename,filepath);
 
 
         //zip file to transfer
@@ -128,9 +123,9 @@ public class RemoteServeThread extends Node implements Runnable{
 
 
 
-    public static void zipCompress(String aftcompressName, String filepathToCompress) throws IOException{
+    public static void zipCompress(String aftcompressName, String filename, String filepathToCompress) throws IOException{
         ZipOutputStream zout=new ZipOutputStream(new FileOutputStream(aftcompressName+".zip"));
-        compressFile(new File(filepathToCompress),filepathToCompress,zout);
+        compressFile(new File(filepathToCompress),filename,zout);
         zout.close();
 
     }

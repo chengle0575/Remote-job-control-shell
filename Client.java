@@ -24,28 +24,29 @@ public abstract class Client extends Node{
                 System.out.println("file path sent: "+remoteCurFilePath);
 
 
-                sendMessage(socket,new Command("getFile","./out"));
-                recieveFile(socket,"try.zip");
-                /*
-                //sendMessage(socket,new Command(command,remoteCurFilePath));
+                if(command.startsWith("getFile")){
+                    sendMessage(socket,new Command(command,remoteCurFilePath));
 
-                //Info info=(Info)recievemessgae(socket);
-                //System.out.println(info.toString());
+                    recieveFile(socket,"try.zip");
+                }else{
 
-                if("INVALID FILE PATH".equals(info.toString())){
-                    System.out.println("checkout!!!!!!!!!!!");
-                    remoteCurFilePath=remotePreFilePath; //invert the change of filepath
+                    sendMessage(socket,new Command(command,remoteCurFilePath));
+
+                    Info info=(Info)recievemessgae(socket);
+                    System.out.println(info.toString());
+
+                    if("INVALID FILE PATH".equals(info.toString())){
+                        System.out.println("checkout!!!!!!!!!!!");
+                        remoteCurFilePath=remotePreFilePath; //invert the change of filepath
+                    }
+
+
                 }
-
-                 */
             }
 
         }catch (Exception e){
             System.out.println(e);
         }
-
-
-
 
     }
 
@@ -134,7 +135,6 @@ public abstract class Client extends Node{
         w.flush();
         w.close();
         System.out.println("file is fully recieved");
-       // r.close();
 
     }
 
