@@ -11,7 +11,6 @@ import java.util.zip.ZipOutputStream;
 
 public class Remote extends Node{
 
-
     public static void main(String[] args)
     {
         try{
@@ -30,14 +29,10 @@ public class Remote extends Node{
             }catch (Exception e){
                 System.out.println(e);
         }
-
-
-
     }
 
 
     public static Socket waitingConnection(ServerSocket serverSocket) throws Exception{
-
         Socket socket=serverSocket.accept();
         return socket;
     }

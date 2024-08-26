@@ -12,27 +12,35 @@ public abstract class Client extends Node{
     public static void main(String[] args){
 
         try{
-            Socket socket=connectRemote(5110);//create a socket to connect to the remote
 
-            remoteCurFilePath=recieveMessage(socket).toString(); //get the current direcory of the remote machine
-            System.out.println("Remote machine is working in: "+remoteCurFilePath);
-
+            Socket socket=null;
             while (true){
+
                 String command=commandFromUser();//send command to remote machine
 
-                if(command.startsWith("getFile")){
+                if(socket==null){
+                    if(command.startsWith("connect")){
+                        socket=connectRemote(5110);//create a socket to connect to the remote
+
+                        remoteCurFilePath=recieveMessage(socket).toString(); //get the current direcory of the remote machine
+                        System.out.println("Remote machine is working in: "+remoteCurFilePath);
+                    }else{
+                        System.out.println("Not connected with remote machine. Type 'connect' ");
+                    }
+                } else if(command.equals("close")){
+                    System.out.println("Remote connection is closed");
+                    socket.close();
+                    socket=null;
+                } else if(command.startsWith("getFile")){
                     sendMessage(socket,new Command(command,remoteCurFilePath));
-
-                    recieveFile(socket,"try.zip");
-                }else{
-
+                    recieveFile(socket,"try.zip");// recived file name
+                } else{
                     sendMessage(socket,new Command(command,remoteCurFilePath));
-
                     Message recievmessage=recieveMessage(socket);
+
                     if(recievmessage instanceof Result){
                         Result res=(Result)recievmessage;
                         System.out.println(res.result.toString());
-
                     }else{// is info
                         Info info=(Info) recievmessage;
                         System.out.println(info);
@@ -41,11 +49,6 @@ public abstract class Client extends Node{
                             remoteCurFilePath=remotePreFilePath; //invert the change of filepath
                         }
                     }
-
-
-
-
-
                 }
             }
 
