@@ -24,12 +24,22 @@ public class RemoteServeThread extends Node implements Runnable{
                 System.out.println("Waiting command from client......");
                 while(true){
                     Command command=recieveCommand(this.socket);//get command from this socket and run command
-                    System.out.println(command);
+                    System.out.println("Reciev command: "+command);
 
                     if(checkFilePathValid(command.getFilepath())){
                         System.out.println("valid filepath");
-                        Message result=executeCommand(command);
-                        sendMessage(this.socket,result);
+
+
+                        if(command.getCommand().equals("getFile")){//deal with getFile command
+                            sendFile(this.socket,command.getFilepath());
+                            System.out.println("file is sent");
+
+                        }else{ //deal with executable command
+                            Message result=executeCommand(command);
+                            sendMessage(this.socket,result);
+                        }
+
+
                     }else{
                         System.out.println("invalid filepath");
                         sendMessage(this.socket,new Info("INVALID FILE PATH"));
@@ -55,17 +65,12 @@ public class RemoteServeThread extends Node implements Runnable{
         String command=c.getCommand();
         String filepath=c.getFilepath();
 
-        if("gFile".equals(command)){//deal with getfile command here
-        }
 
         File file=new File(filepath);
-
         Result result=new Result();
-
 
         try{
             Process p = Runtime.getRuntime().exec(command,new String[0],file);
-
             BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()));
 
             String line = r.readLine();
@@ -77,21 +82,6 @@ public class RemoteServeThread extends Node implements Runnable{
 
             return result;
         }catch (IOException e){
-            //deal with command not able to execute directly in remote shell
-
-            if(command.matches("^getFile {1}")){
-                //try to find file name in the given pathname
-                if(file.isFile()){ //is normal file
-                    if(file.canRead()){
-                        result.add(sendLocalTextFile());
-                    }
-
-                }else if(file.isDirectory()){ //is directory
-
-                }else{ //eg/ symbolic links
-
-                }
-            }
             return null;
 
         }
@@ -105,33 +95,31 @@ public class RemoteServeThread extends Node implements Runnable{
         return System.getProperty("user.dir");
     }
 
-    public static void sendLocalByteFile(Socket socket,String filepath) throws IOException{
-        //assuming the filepath refer to 'raw byte file', not text file ,not directory
-        FileInputStream f=new FileInputStream("./blue.png");
-        f.read();
 
 
-        BufferedWriter w=new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-       // w.write();
+    public static void sendFile(Socket socket,String filepath) throws IOException{
+        BufferedOutputStream w=new BufferedOutputStream(socket.getOutputStream());
 
-    }
+       //compress the file
+        String aftcompressName=new File(filepath).getName();
+        zipCompress(aftcompressName,filepath);
 
 
-    public static String sendLocalTextFile() {
-        try{
-            InputStreamReader r=new InputStreamReader(new FileInputStream("./README.md"));
-            char[] buffer=new char[1024];
-            r.read(buffer);
+        //zip file to transfer
+        File aftzip=new File(aftcompressName+".zip");
+        FileInputStream fin=new FileInputStream(aftzip);
 
-            String s=new String(buffer);
-            // System.out.println(s);
-/*
-            sendMessage(socket,new Info(s));*/
-            return s;
-        }catch (Exception e){
-            System.out.println(e);
+
+        System.out.println(aftzip.getAbsolutePath());
+        byte[] buffer=new byte[1024];
+        int length=1024;
+        while((length=fin.read(buffer,0,length))>0){
+            System.out.println(length+"is sending...");
+            w.write(buffer);
         }
-        return null;
+
+        fin.close();
+        w.close();
     }
 
 
@@ -147,11 +135,11 @@ public class RemoteServeThread extends Node implements Runnable{
             return;
         if(file.isDirectory()){ //directory itself is treated as an empty zipentry
             if(filename.endsWith("/")){
-                System.out.println("next entry:"+filename);
+               // System.out.println("next entry:"+filename);
                 zout.putNextEntry(new ZipEntry(filename));
                 zout.closeEntry();
             }else{
-                System.out.println("next entry:"+filename);
+               // System.out.println("next entry:"+filename);
                 zout.putNextEntry(new ZipEntry(filename+"/"));
                 zout.closeEntry();
             }
@@ -168,10 +156,10 @@ public class RemoteServeThread extends Node implements Runnable{
         //put a zip entry refer to the source file into zip archive
         ZipEntry zipEntry=new ZipEntry(filename);
         zout.putNextEntry(zipEntry);
-        System.out.println("next entry:"+filename);
+       // System.out.println("next entry:"+filename);
         //write into the zip
         byte[] bytes=new byte[1024];
-        int length;
+        int length=1024;
         while((length=fin.read(bytes))>0){
             zout.write(bytes,0,length);
         }
@@ -179,18 +167,5 @@ public class RemoteServeThread extends Node implements Runnable{
 
         fin.close(); //close the file when finish reading
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 }

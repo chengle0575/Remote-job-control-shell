@@ -2,6 +2,7 @@ import java.net.*;
 import java.io.*;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.zip.ZipOutputStream;
 
 public abstract class Client extends Node{
 
@@ -22,15 +23,21 @@ public abstract class Client extends Node{
                 System.out.println("command sent: "+command);
                 System.out.println("file path sent: "+remoteCurFilePath);
 
-                sendMessage(socket,new Command(command,remoteCurFilePath));
 
-                Info info=(Info)recievemessgae(socket);
-                System.out.println(info.toString());
+                sendMessage(socket,new Command("getFile","./out"));
+                recieveFile(socket,"try.zip");
+                /*
+                //sendMessage(socket,new Command(command,remoteCurFilePath));
+
+                //Info info=(Info)recievemessgae(socket);
+                //System.out.println(info.toString());
 
                 if("INVALID FILE PATH".equals(info.toString())){
                     System.out.println("checkout!!!!!!!!!!!");
                     remoteCurFilePath=remotePreFilePath; //invert the change of filepath
                 }
+
+                 */
             }
 
         }catch (Exception e){
@@ -101,6 +108,28 @@ public abstract class Client extends Node{
     }
 
 
+    public static void recieveFile(Socket socket,String zipfoldername) throws IOException{
+        System.out.println("file is recieved");
+        BufferedInputStream r=new BufferedInputStream(socket.getInputStream());
+
+        //create a zip file
+        File f=new File(zipfoldername);
+        BufferedOutputStream w=new BufferedOutputStream(new FileOutputStream(f));
+
+        //wirte data to the zipfile
+        int length=0;
+        byte[] buffer=new byte[1024];
+        while ((length=r.read(buffer))>0){
+            System.out.println(length+"is recieving");
+            w.write(buffer,0,length);
+        }
+
+        w.flush();
+        w.close();
+        System.out.println("file is fully recieved");
+       // r.close();
+
+    }
 
 
 }

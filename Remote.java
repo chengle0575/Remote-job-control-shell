@@ -15,8 +15,6 @@ public class Remote extends Node{
     public static void main(String[] args)
     {
         try{
-           
-            
             /*create a listrning socket*/
                 ServerSocket serversocket=new ServerSocket(5110);//start the slave to listen to all incoming connection request
                 System.out.println("Waiting to be connected......");
