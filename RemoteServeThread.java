@@ -21,29 +21,32 @@ public class RemoteServeThread extends Node implements Runnable{
                 System.out.println("A client is connected");
                 sendMessage(socket,new Info(getCurDirectory())); //send current directory path to the client
 
-                System.out.println("Waiting command from client......");
+                System.out.println("--------*Waiting message from client..*--------");
                 while(true){
-                    Command command=recieveCommand(this.socket);//get command from this socket and run command
-                    System.out.println("Reciev command: "+command);
+                    Message recievmessage=recieveMessage(this.socket);
 
-                    if(checkFilePathValid(command.getFilepath())){
-                        System.out.println("valid filepath");
+                    if(recievmessage instanceof Command){
+                        Command command=(Command) recievmessage;
+                        System.out.println("Reciev command: "+command);
 
-
-                        if(command.getCommand().startsWith("getFile")){//deal with getFile command
-                            sendFile(this.socket, command.getCommand().substring(8),command.getFilepath()+command.getCommand().substring(8));
-                            System.out.println("file is sent");
-
-                        }else{ //deal with executable command
-                            Message result=executeCommand(command);
-                            sendMessage(this.socket,result);
+                        if(checkFilePathValid(command.getFilepath())){
+                            if(command.getCommand().startsWith("getFile")){//deal with getFile command
+                                sendFile(this.socket, command.getCommand().substring(8),command.getFilepath()+command.getCommand().substring(8));
+                                System.out.println("file is sent");
+                            }else{ //deal with executable command
+                                Message result=executeCommand(command);
+                                sendMessage(this.socket,result);
+                            }
+                        }else{
+                            System.out.println("invalid filepath");
+                            sendMessage(this.socket,new Info("INVALID FILE PATH"));
                         }
 
 
-                    }else{
-                        System.out.println("invalid filepath");
-                        sendMessage(this.socket,new Info("INVALID FILE PATH"));
+                    }else{// is an info
+                        System.out.println(recievmessage.stringToSend());
                     }
+
                 }
 
 
@@ -62,7 +65,7 @@ public class RemoteServeThread extends Node implements Runnable{
         return f.exists();
     }
 
-    public Message executeCommand(Command c) throws NullPointerException{
+    public Result executeCommand(Command c) throws NullPointerException{
         String command=c.getCommand();
         String filepath=c.getFilepath();
 

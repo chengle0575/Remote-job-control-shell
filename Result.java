@@ -8,6 +8,10 @@ public class Result implements Message{
         this.result=new ArrayList<>();
     }
 
+    public Result(List l){
+        this.result=l;
+    }
+
     public void add(String content){
         this.result.add(content);
     }

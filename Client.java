@@ -14,15 +14,11 @@ public abstract class Client extends Node{
         try{
             Socket socket=connectRemote(5110);//create a socket to connect to the remote
 
-            remoteCurFilePath=recievemessgae(socket).toString(); //get the current direcory of the remote machine
+            remoteCurFilePath=recieveMessage(socket).toString(); //get the current direcory of the remote machine
             System.out.println("Remote machine is working in: "+remoteCurFilePath);
 
             while (true){
                 String command=commandFromUser();//send command to remote machine
-
-                System.out.println("command sent: "+command);
-                System.out.println("file path sent: "+remoteCurFilePath);
-
 
                 if(command.startsWith("getFile")){
                     sendMessage(socket,new Command(command,remoteCurFilePath));
@@ -32,13 +28,22 @@ public abstract class Client extends Node{
 
                     sendMessage(socket,new Command(command,remoteCurFilePath));
 
-                    Info info=(Info)recievemessgae(socket);
-                    System.out.println(info.toString());
+                    Message recievmessage=recieveMessage(socket);
+                    if(recievmessage instanceof Result){
+                        Result res=(Result)recievmessage;
+                        System.out.println(res.result.toString());
 
-                    if("INVALID FILE PATH".equals(info.toString())){
-                        System.out.println("checkout!!!!!!!!!!!");
-                        remoteCurFilePath=remotePreFilePath; //invert the change of filepath
+                    }else{// is info
+                        Info info=(Info) recievmessage;
+                        System.out.println(info);
+                        if("INVALID FILE PATH".equals(info.toString())){
+                            System.out.println("checkout!!!!!!!!!!!");
+                            remoteCurFilePath=remotePreFilePath; //invert the change of filepath
+                        }
                     }
+
+
+
 
 
                 }
@@ -137,6 +142,8 @@ public abstract class Client extends Node{
         System.out.println("file is fully recieved");
 
     }
+
+
 
 
 }
