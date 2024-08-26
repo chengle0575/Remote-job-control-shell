@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPOutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 public class RemoteServeThread extends Node implements Runnable{
 
@@ -48,7 +51,7 @@ public class RemoteServeThread extends Node implements Runnable{
 
 
 
-    public static Message executeCommand(Command c) throws NullPointerException{
+    public Message executeCommand(Command c) throws NullPointerException{
         String command=c.getCommand();
         String filepath=c.getFilepath();
 
@@ -79,6 +82,9 @@ public class RemoteServeThread extends Node implements Runnable{
             if(command.matches("^getFile {1}")){
                 //try to find file name in the given pathname
                 if(file.isFile()){ //is normal file
+                    if(file.canRead()){
+                        result.add(sendLocalTextFile());
+                    }
 
                 }else if(file.isDirectory()){ //is directory
 
@@ -110,19 +116,76 @@ public class RemoteServeThread extends Node implements Runnable{
 
     }
 
-    public static void sendLocalTextFile() throws IOException{
 
+    public static String sendLocalTextFile() {
+        try{
+            InputStreamReader r=new InputStreamReader(new FileInputStream("./README.md"));
+            char[] buffer=new char[1024];
+            r.read(buffer);
+
+            String s=new String(buffer);
+            // System.out.println(s);
+/*
+            sendMessage(socket,new Info(s));*/
+            return s;
+        }catch (Exception e){
+            System.out.println(e);
+        }
+        return null;
     }
 
 
 
-    public static boolean isTextFile(String pathname) throws IOException{
-        String regrex="\\.(pdf|doc|java|md)$";
-        Pattern p= Pattern.compile(regrex);
-        Matcher m=p.matcher(pathname);
-        return m.matches();
+    public static void zipCompress(String aftcompressName, String filepathToCompress) throws IOException{
+        ZipOutputStream zout=new ZipOutputStream(new FileOutputStream(aftcompressName+".zip"));
+        compressFile(new File(filepathToCompress),filepathToCompress,zout);
+        zout.close();
 
     }
+    public static void compressFile(File file,String filename,ZipOutputStream zout) throws IOException{
+        if(file.isHidden())
+            return;
+        if(file.isDirectory()){ //directory itself is treated as an empty zipentry
+            if(filename.endsWith("/")){
+                System.out.println("next entry:"+filename);
+                zout.putNextEntry(new ZipEntry(filename));
+                zout.closeEntry();
+            }else{
+                System.out.println("next entry:"+filename);
+                zout.putNextEntry(new ZipEntry(filename+"/"));
+                zout.closeEntry();
+            }
+
+            for(File child:file.listFiles()){
+                /*the contents inside inner directory is maintained using zipEntry's path */
+                compressFile(child,filename+"/"+child.getName(),zout);
+            }
+            return;
+        }
+
+        /*FOR FILES*/
+        FileInputStream fin=new FileInputStream(file);
+        //put a zip entry refer to the source file into zip archive
+        ZipEntry zipEntry=new ZipEntry(filename);
+        zout.putNextEntry(zipEntry);
+        System.out.println("next entry:"+filename);
+        //write into the zip
+        byte[] bytes=new byte[1024];
+        int length;
+        while((length=fin.read(bytes))>0){
+            zout.write(bytes,0,length);
+        }
+        zout.closeEntry();
+
+        fin.close(); //close the file when finish reading
+    }
+
+
+
+
+
+
+
 
 
 

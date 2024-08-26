@@ -4,6 +4,10 @@ import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.GZIPOutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 public class Remote extends Node{
 
@@ -11,7 +15,9 @@ public class Remote extends Node{
     public static void main(String[] args)
     {
         try{
-                /*create a listrning socket*/
+           
+            
+            /*create a listrning socket*/
                 ServerSocket serversocket=new ServerSocket(5110);//start the slave to listen to all incoming connection request
                 System.out.println("Waiting to be connected......");
 
@@ -37,6 +43,9 @@ public class Remote extends Node{
         Socket socket=serverSocket.accept();
         return socket;
     }
+
+
+
 
 
 
