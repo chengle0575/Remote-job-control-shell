@@ -61,6 +61,7 @@ public abstract class Client extends Node{
 
 
     public static String commandFromUser() throws IOException{
+        System.out.println("Waiting command input.....");
         BufferedReader r=new BufferedReader(new InputStreamReader(System.in));
         String command=r.readLine();
 
@@ -116,11 +117,17 @@ public abstract class Client extends Node{
         File f=new File(zipfoldername);
         BufferedOutputStream w=new BufferedOutputStream(new FileOutputStream(f));
 
+        DataInputStream datar=new DataInputStream(r);
+        int byteToread= datar.readInt();
+        System.out.println("all byte to read:"+byteToread);
         //wirte data to the zipfile
         int length=0;
         byte[] buffer=new byte[1024];
-        while ((length=r.read(buffer))>0){
-            System.out.println(length+"is recieving");
+
+        while(byteToread>0){
+            length=r.read(buffer);
+            byteToread-=length;
+            System.out.println("left to read: "+byteToread);
             w.write(buffer,0,length);
         }
 

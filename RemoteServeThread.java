@@ -109,6 +109,10 @@ public class RemoteServeThread extends Node implements Runnable{
         File aftzip=new File(aftcompressName+".zip");
         FileInputStream fin=new FileInputStream(aftzip);
 
+        //send byte number to client
+        System.out.println("file size:"+fin.available());
+        DataOutputStream dataw=new DataOutputStream(w);
+        dataw.writeInt(fin.available());
 
         System.out.println(aftzip.getAbsolutePath());
         byte[] buffer=new byte[1024];
@@ -117,9 +121,9 @@ public class RemoteServeThread extends Node implements Runnable{
             System.out.println(length+"is sending...");
             w.write(buffer);
         }
-
+        w.flush();
         fin.close();
-        w.close();
+
     }
 
 
